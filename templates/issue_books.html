@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}Issue & Return Books{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>Issue & Return Books</h2>
+</div>
+
+<div class="form-card">
+    <h3>Issue New Book</h3>
+    <form method="POST" action="{{ url_for('issues.issue_book') }}">
+        <div class="form-group">
+            <label for="student_id">Select Student:</label>
+            <select id="student_id" name="student_id" required>
+                <option value="">Choose a student</option>
+                {% for student in students %}
+                <option value="{{ student.id }}">{{ student.name }} ({{ student.course }})</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="book_id">Select Book:</label>
+            <select id="book_id" name="book_id" required>
+                <option value="">Choose a book</option>
+                {% for book in books %}
+                <option value="{{ book.id }}">{{ book.title }} by {{ book.author }} ({{ book.book_type }})</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Issue Book</button>
+    </form>
+</div>
+
+<div class="table-container">
+    <h3>Currently Issued Books</h3>
+    {% if issues %}
+    <table>
+        <thead>
+            <tr>
+                <th>Issue ID</th>
+                <th>Student</th>
+                <th>Book</th>
+                <th>Issue Date</th>
+                <th>Due Date</th>
+                <th>Fine</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for issue in issues %}
+            <tr {% if issue.fine > 0 %}class="overdue"{% endif %}>
+                <td>{{ issue.id }}</td>
+                <td>{{ issue.student.name }}</td>
+                <td>{{ issue.book.title }}</td>
+                <td>{{ issue.issue_date.strftime('%Y-%m-%d') }}</td>
+                <td>{{ issue.due_date.strftime('%Y-%m-%d') }}</td>
+                <td>
+                    {% if issue.fine > 0 %}
+                        <span class="fine-amount">${{ "%.2f"|format(issue.fine) }}</span>
+                    {% else %}
+                        $0.00
+                    {% endif %}
+                </td>
+                <td>
+                    <form method="POST" action="{{ url_for('issues.return_book', id=issue.id) }}" style="display:inline;">
+                        <button type="submit" class="btn btn-success">Return</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="no-data">No books currently issued.</p>
+    {% endif %}
+</div>
+
+<div class="info-box">
+    <h4>📋 Information</h4>
+    <ul>
+        <li>Books are issued for 14 days by default</li>
+        <li>Late returns incur a fine of $5 per day</li>
+        <li>Fines are calculated automatically when books are returned</li>
+        <li>Return books on time to avoid penalties</li>
+    </ul>
+</div>
+{% endblock %}

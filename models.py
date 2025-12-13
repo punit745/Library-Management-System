@@ -1,0 +1,54 @@
+from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime, timedelta
+
+db = SQLAlchemy()
+
+class Student(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    course = db.Column(db.String(100), nullable=False)
+    issues = db.relationship('Issue', backref='student', lazy=True)
+
+    def __repr__(self):
+        return f'<Student {self.name}>'
+
+class Book(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    author = db.Column(db.String(100), nullable=False)
+    book_type = db.Column(db.String(50), nullable=False)  # textbook or reference
+    course = db.Column(db.String(100), nullable=True)  # Course correlation
+    available = db.Column(db.Boolean, default=True)
+    issues = db.relationship('Issue', backref='book', lazy=True)
+
+    def __repr__(self):
+        return f'<Book {self.title}>'
+
+class Issue(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    student_id = db.Column(db.Integer, db.ForeignKey('student.id'), nullable=False)
+    book_id = db.Column(db.Integer, db.ForeignKey('book.id'), nullable=False)
+    issue_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    due_date = db.Column(db.DateTime, nullable=False)
+    return_date = db.Column(db.DateTime, nullable=True)
+    fine = db.Column(db.Float, default=0.0)
+    returned = db.Column(db.Boolean, default=False)
+
+    def __init__(self, **kwargs):
+        super(Issue, self).__init__(**kwargs)
+        if not self.due_date:
+            self.due_date = datetime.utcnow() + timedelta(days=14)
+
+    def calculate_fine(self):
+        if self.returned and self.return_date:
+            if self.return_date > self.due_date:
+                days_late = (self.return_date - self.due_date).days
+                self.fine = days_late * 5.0  # $5 per day
+        elif not self.returned:
+            if datetime.utcnow() > self.due_date:
+                days_late = (datetime.utcnow() - self.due_date).days
+                self.fine = days_late * 5.0
+
+    def __repr__(self):
+        return f'<Issue {self.id}>'
