@@ -107,6 +107,11 @@ body {
     color: #2c3e50;
 }
 
+.feature-card h3 i {
+    color: #3498db;
+    margin-right: 0.5rem;
+}
+
 .feature-card p {
     color: #666;
     margin-bottom: 1rem;
@@ -133,6 +138,11 @@ body {
 .info-section li {
     padding: 0.5rem 0;
     font-size: 1.1rem;
+}
+
+.info-section li i {
+    color: #27ae60;
+    margin-right: 0.5rem;
 }
 
 /* Page Header */
@@ -199,6 +209,10 @@ body {
     cursor: pointer;
     font-size: 1rem;
     transition: background-color 0.3s;
+}
+
+.btn i {
+    margin-right: 0.5rem;
 }
 
 .btn:hover {
@@ -338,6 +352,11 @@ tr:hover {
 .info-box h4 {
     color: #2c3e50;
     margin-bottom: 1rem;
+}
+
+.info-box h4 i {
+    color: #3498db;
+    margin-right: 0.5rem;
 }
 
 .info-box ul {
