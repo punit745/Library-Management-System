@@ -92,8 +92,7 @@
                     {% if issue.return_date %}
                         {{ (issue.return_date - issue.due_date).days if issue.return_date > issue.due_date else 0 }}
                     {% else %}
-                        {% set now = None %}
-                        {{ ((now or issue.return_date or issue.due_date).__class__.utcnow() - issue.due_date).days if (now or issue.return_date or issue.due_date).__class__.utcnow() > issue.due_date else 0 }}
+                        {{ (current_time - issue.due_date).days if current_time > issue.due_date else 0 }}
                     {% endif %}
                 </td>
                 <td>

@@ -26,7 +26,8 @@ def fine_calculator():
                          issues=issues_with_fines,
                          total_fines=total_fines,
                          total_outstanding=total_outstanding,
-                         total_collected=total_collected)
+                         total_collected=total_collected,
+                         current_time=datetime.utcnow())
 
 @bp.route('/calculate', methods=['POST'])
 def calculate_fine():
@@ -58,6 +59,7 @@ def calculate_fine():
                              total_fines=total_fines,
                              total_outstanding=total_outstanding,
                              total_collected=total_collected,
+                             current_time=datetime.utcnow(),
                              manual_calculation={
                                  'days_late': days_late,
                                  'fine_rate': fine_rate,
@@ -69,4 +71,5 @@ def calculate_fine():
                              total_fines=total_fines,
                              total_outstanding=total_outstanding,
                              total_collected=total_collected,
+                             current_time=datetime.utcnow(),
                              error="Invalid input. Please enter valid numbers.")
