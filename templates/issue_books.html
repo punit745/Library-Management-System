@@ -28,7 +28,7 @@
                 {% endfor %}
             </select>
         </div>
-        <button type="submit" class="btn btn-primary"><i class="fas fa-hand-holding-medical"></i> Issue Book</button>
+        <button type="submit" class="btn btn-primary">Issue Book</button>
     </form>
 </div>
 
@@ -64,7 +64,7 @@
                 </td>
                 <td>
                     <form method="POST" action="{{ url_for('issues.return_book', id=issue.id) }}" style="display:inline;">
-                        <button type="submit" class="btn btn-success"><i class="fas fa-undo-alt"></i> Return</button>
+                        <button type="submit" class="btn btn-success">Return</button>
                     </form>
                 </td>
             </tr>
@@ -77,7 +77,7 @@
 </div>
 
 <div class="info-box">
-    <h4><i class="fas fa-info-circle"></i> Information</h4>
+    <h4>Information</h4>
     <ul>
         <li>Books are issued for 14 days by default</li>
         <li>Late returns incur a fine of $5 per day</li>

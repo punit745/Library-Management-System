@@ -14,9 +14,18 @@ def add_book():
     author = request.form.get('author')
     book_type = request.form.get('book_type')
     course = request.form.get('course')
+    duration_type = request.form.get('duration_type', 'semester')
+    duration_days = request.form.get('duration_days')
     
     if title and author and book_type:
-        book = Book(title=title, author=author, book_type=book_type, course=course)
+        book = Book(
+            title=title, 
+            author=author, 
+            book_type=book_type, 
+            course=course,
+            duration_type=duration_type,
+            duration_days=int(duration_days) if duration_days else None
+        )
         try:
             db.session.add(book)
             db.session.commit()

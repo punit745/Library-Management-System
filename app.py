@@ -10,12 +10,13 @@ db.init_app(app)
 migrate = Migrate(app, db)
 
 # Import routes
-from routes import book_routes, student_routes, issue_routes
+from routes import book_routes, student_routes, issue_routes, fine_routes
 
 # Register blueprints
 app.register_blueprint(book_routes.bp)
 app.register_blueprint(student_routes.bp)
 app.register_blueprint(issue_routes.bp)
+app.register_blueprint(fine_routes.bp)
 
 @app.route('/')
 def index():

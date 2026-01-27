@@ -19,6 +19,8 @@ class Book(db.Model):
     author = db.Column(db.String(100), nullable=False)
     book_type = db.Column(db.String(50), nullable=False)  # textbook or reference
     course = db.Column(db.String(100), nullable=True)  # Course correlation
+    duration_type = db.Column(db.String(50), nullable=False, default='semester')  # semester or specific
+    duration_days = db.Column(db.Integer, nullable=True)  # For specific period books
     available = db.Column(db.Boolean, default=True)
     issues = db.relationship('Issue', backref='book', lazy=True)
 
