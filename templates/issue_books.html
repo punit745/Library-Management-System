@@ -57,9 +57,9 @@
                 <td>{{ issue.due_date.strftime('%Y-%m-%d') }}</td>
                 <td>
                     {% if issue.fine > 0 %}
-                        <span class="fine-amount">${{ "%.2f"|format(issue.fine) }}</span>
+                        <span class="fine-amount">₹{{ "%.2f"|format(issue.fine) }}</span>
                     {% else %}
-                        $0.00
+                        ₹0.00
                     {% endif %}
                 </td>
                 <td>
@@ -81,7 +81,7 @@
     <ul>
         <li>Books with specific period duration are issued for their specified days</li>
         <li>Books for whole semester are issued for 14 days by default</li>
-        <li>Late returns incur a fine of $5 per day</li>
+        <li>Late returns incur a fine of ₹50 per day</li>
         <li>Fines are calculated automatically when books are returned</li>
         <li>Return books on time to avoid penalties</li>
     </ul>

@@ -61,7 +61,7 @@ def return_book(id):
         try:
             db.session.commit()
             if issue.fine > 0:
-                flash(f'Book returned successfully! Fine: ${issue.fine:.2f}', 'warning')
+                flash(f'Book returned successfully! Fine: ₹{issue.fine:.2f}', 'warning')
             else:
                 flash('Book returned successfully!', 'success')
         except Exception as e:

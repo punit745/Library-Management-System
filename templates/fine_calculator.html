@@ -16,7 +16,7 @@
         </div>
         <div class="form-group">
             <label for="fine_rate">Fine Rate (per day):</label>
-            <input type="number" id="fine_rate" name="fine_rate" step="0.01" min="0" value="{{ manual_calculation.fine_rate if manual_calculation else 5.00 }}" required>
+            <input type="number" id="fine_rate" name="fine_rate" step="0.01" min="0" value="{{ manual_calculation.fine_rate if manual_calculation else 50.00 }}" required>
         </div>
         <button type="submit" class="btn btn-primary">Calculate Fine</button>
     </form>
@@ -24,9 +24,9 @@
     {% if manual_calculation %}
     <div style="margin-top: 1.5rem; padding: 1rem; background-color: #e7f3ff; border-radius: 5px;">
         <h4 style="margin-bottom: 0.5rem;">Calculated Fine:</h4>
-        <p style="font-size: 1.5rem; font-weight: bold; color: #e74c3c;">${{ "%.2f"|format(manual_calculation.calculated_fine) }}</p>
+        <p style="font-size: 1.5rem; font-weight: bold; color: #e74c3c;">₹{{ "%.2f"|format(manual_calculation.calculated_fine) }}</p>
         <p style="color: #666; margin-top: 0.5rem;">
-            {{ manual_calculation.days_late }} days × ${{ "%.2f"|format(manual_calculation.fine_rate) }} per day
+            {{ manual_calculation.days_late }} days × ₹{{ "%.2f"|format(manual_calculation.fine_rate) }} per day
         </p>
     </div>
     {% endif %}
@@ -43,15 +43,15 @@
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
         <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1.5rem; border-radius: 10px; text-align: center;">
             <h4 style="margin: 0; font-size: 0.9rem; opacity: 0.9;">Total Fines</h4>
-            <p style="margin: 0.5rem 0 0 0; font-size: 2rem; font-weight: bold;">${{ "%.2f"|format(total_fines) }}</p>
+            <p style="margin: 0.5rem 0 0 0; font-size: 2rem; font-weight: bold;">₹{{ "%.2f"|format(total_fines) }}</p>
         </div>
         <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 1.5rem; border-radius: 10px; text-align: center;">
             <h4 style="margin: 0; font-size: 0.9rem; opacity: 0.9;">Outstanding</h4>
-            <p style="margin: 0.5rem 0 0 0; font-size: 2rem; font-weight: bold;">${{ "%.2f"|format(total_outstanding) }}</p>
+            <p style="margin: 0.5rem 0 0 0; font-size: 2rem; font-weight: bold;">₹{{ "%.2f"|format(total_outstanding) }}</p>
         </div>
         <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 1.5rem; border-radius: 10px; text-align: center;">
             <h4 style="margin: 0; font-size: 0.9rem; opacity: 0.9;">Collected</h4>
-            <p style="margin: 0.5rem 0 0 0; font-size: 2rem; font-weight: bold;">${{ "%.2f"|format(total_collected) }}</p>
+            <p style="margin: 0.5rem 0 0 0; font-size: 2rem; font-weight: bold;">₹{{ "%.2f"|format(total_collected) }}</p>
         </div>
     </div>
 </div>
@@ -90,7 +90,7 @@
                 </td>
                 <td>{{ issue.get_days_late() }}</td>
                 <td>
-                    <span class="fine-amount">${{ "%.2f"|format(issue.fine) }}</span>
+                    <span class="fine-amount">₹{{ "%.2f"|format(issue.fine) }}</span>
                 </td>
                 <td>
                     {% if issue.returned %}
@@ -111,7 +111,7 @@
 <div class="info-box">
     <h4>Fine Calculation Information</h4>
     <ul>
-        <li>Default fine rate: $5.00 per day</li>
+        <li>Default fine rate: ₹50.00 per day</li>
         <li>Fines are calculated from the day after the due date</li>
         <li>Use the manual calculator above to estimate fines for different scenarios</li>
         <li>Outstanding fines must be collected when books are returned</li>

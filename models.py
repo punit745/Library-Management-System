@@ -28,6 +28,9 @@ class Book(db.Model):
         return f'<Book {self.title}>'
 
 class Issue(db.Model):
+    DEFAULT_DURATION_DAYS = 14  # Default duration for semester books
+    FINE_RATE_PER_DAY = 50.0  # Fine rate in rupees per day
+    
     id = db.Column(db.Integer, primary_key=True)
     student_id = db.Column(db.Integer, db.ForeignKey('student.id'), nullable=False)
     book_id = db.Column(db.Integer, db.ForeignKey('book.id'), nullable=False)
@@ -41,7 +44,7 @@ class Issue(db.Model):
         super(Issue, self).__init__(**kwargs)
         if not self.due_date:
             # Set default due date, will be updated after commit
-            self.due_date = datetime.utcnow() + timedelta(days=14)
+            self.due_date = datetime.utcnow() + timedelta(days=self.DEFAULT_DURATION_DAYS)
     
     def set_due_date_from_book(self):
         """Set due date based on the associated book's duration settings"""
@@ -51,18 +54,18 @@ class Issue(db.Model):
                 # Use book's specific duration
                 self.due_date = self.issue_date + timedelta(days=book.duration_days)
             else:
-                # Default to 14 days for semester books or if no duration specified
-                self.due_date = self.issue_date + timedelta(days=14)
+                # Default to standard duration for semester books
+                self.due_date = self.issue_date + timedelta(days=self.DEFAULT_DURATION_DAYS)
 
     def calculate_fine(self):
         if self.returned and self.return_date:
             if self.return_date > self.due_date:
                 days_late = (self.return_date - self.due_date).days
-                self.fine = days_late * 5.0  # $5 per day
+                self.fine = days_late * self.FINE_RATE_PER_DAY
         elif not self.returned:
             if datetime.utcnow() > self.due_date:
                 days_late = (datetime.utcnow() - self.due_date).days
-                self.fine = days_late * 5.0
+                self.fine = days_late * self.FINE_RATE_PER_DAY
     
     def get_days_late(self):
         """Get the number of days this issue is/was late"""

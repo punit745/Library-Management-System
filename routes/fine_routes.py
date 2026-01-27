@@ -50,7 +50,7 @@ def calculate_fine():
     
     try:
         days_late = int(request.form.get('days_late', 0))
-        fine_rate = float(request.form.get('fine_rate', 5.0))
+        fine_rate = float(request.form.get('fine_rate', 50.0))
         
         calculated_fine = days_late * fine_rate
         
