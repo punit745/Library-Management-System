@@ -32,6 +32,8 @@ def issue_book():
             
             try:
                 db.session.add(issue)
+                db.session.flush()  # Flush to assign ID but don't commit yet
+                issue.set_due_date_from_book()  # Set due date based on book
                 db.session.commit()
                 flash(f'Book "{book.title}" issued to {student.name} successfully!', 'success')
             except Exception as e:
@@ -59,7 +61,7 @@ def return_book(id):
         try:
             db.session.commit()
             if issue.fine > 0:
-                flash(f'Book returned successfully! Fine: ${issue.fine:.2f}', 'warning')
+                flash(f'Book returned successfully! Fine: ₹{issue.fine:.2f}', 'warning')
             else:
                 flash('Book returned successfully!', 'success')
         except Exception as e:

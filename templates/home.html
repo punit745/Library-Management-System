@@ -10,33 +10,42 @@
 
 <div class="features">
     <div class="feature-card">
-        <h3><i class="fas fa-book"></i> Book Management</h3>
+        <h3>Book Management</h3>
         <p>Add, update, and manage your library's book collection efficiently</p>
-        <a href="{{ url_for('books.manage_books') }}" class="btn"><i class="fas fa-arrow-right"></i> Manage Books</a>
+        <a href="{{ url_for('books.manage_books') }}" class="btn">Manage Books</a>
     </div>
 
     <div class="feature-card">
-        <h3><i class="fas fa-user-graduate"></i> Student Management</h3>
+        <h3>Student Management</h3>
         <p>Track student profiles, courses, and borrowing history</p>
-        <a href="{{ url_for('students.manage_students') }}" class="btn"><i class="fas fa-arrow-right"></i> Manage Students</a>
+        <a href="{{ url_for('students.manage_students') }}" class="btn">Manage Students</a>
     </div>
 
     <div class="feature-card">
-        <h3><i class="fas fa-book-reader"></i> Issue & Return</h3>
+        <h3>Issue & Return</h3>
         <p>Issue books to students and manage returns with automatic fine calculation</p>
-        <a href="{{ url_for('issues.issue_books') }}" class="btn"><i class="fas fa-arrow-right"></i> Issue Books</a>
+        <a href="{{ url_for('issues.issue_books') }}" class="btn">Issue Books</a>
+    </div>
+    
+    <div class="feature-card">
+        <h3>Fine Calculator</h3>
+        <p>Calculate fines for overdue books and manage penalties</p>
+        <a href="{{ url_for('fines.fine_calculator') }}" class="btn">Calculate Fines</a>
     </div>
 </div>
 
 <div class="info-section">
     <h2>Key Features</h2>
     <ul>
-        <li><i class="fas fa-check-circle"></i> Comprehensive student profile management</li>
-        <li><i class="fas fa-check-circle"></i> Book categorization (textbooks and reference books)</li>
-        <li><i class="fas fa-check-circle"></i> Automatic fine calculation for overdue books</li>
-        <li><i class="fas fa-check-circle"></i> Course-book correlation for curriculum mapping</li>
-        <li><i class="fas fa-check-circle"></i> Track issued books and due dates</li>
-        <li><i class="fas fa-check-circle"></i> Easy-to-use interface for library staff</li>
+        <li>Comprehensive student profile management</li>
+        <li>Book categorization (textbooks and reference books)</li>
+        <li>Automatic fine calculation for overdue books</li>
+        <li>Course-book correlation for curriculum mapping</li>
+        <li>Track issued books and due dates</li>
+        <li>Book duration tracking (semester vs specific period)</li>
+        <li>Pre-loaded book and student databases</li>
+        <li>Dedicated fine calculator tool</li>
+        <li>Easy-to-use interface for library staff</li>
     </ul>
 </div>
 {% endblock %}

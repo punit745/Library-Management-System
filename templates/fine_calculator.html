@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}Fine Calculator{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>Fine Calculator</h2>
+</div>
+
+<div class="form-card">
+    <h3>Manual Fine Calculation</h3>
+    <form method="POST" action="{{ url_for('fines.calculate_fine') }}">
+        <div class="form-group">
+            <label for="days_late">Days Late:</label>
+            <input type="number" id="days_late" name="days_late" min="0" value="{{ manual_calculation.days_late if manual_calculation else 0 }}" required>
+        </div>
+        <div class="form-group">
+            <label for="fine_rate">Fine Rate (per day):</label>
+            <input type="number" id="fine_rate" name="fine_rate" step="0.01" min="0" value="{{ manual_calculation.fine_rate if manual_calculation else 50.00 }}" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Calculate Fine</button>
+    </form>
+    
+    {% if manual_calculation %}
+    <div style="margin-top: 1.5rem; padding: 1rem; background-color: #e7f3ff; border-radius: 5px;">
+        <h4 style="margin-bottom: 0.5rem;">Calculated Fine:</h4>
+        <p style="font-size: 1.5rem; font-weight: bold; color: #e74c3c;">₹{{ "%.2f"|format(manual_calculation.calculated_fine) }}</p>
+        <p style="color: #666; margin-top: 0.5rem;">
+            {{ manual_calculation.days_late }} days × ₹{{ "%.2f"|format(manual_calculation.fine_rate) }} per day
+        </p>
+    </div>
+    {% endif %}
+    
+    {% if error %}
+    <div class="alert alert-error" style="margin-top: 1rem;">
+        {{ error }}
+    </div>
+    {% endif %}
+</div>
+
+<div class="table-container">
+    <h3>Fine Summary</h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1.5rem; border-radius: 10px; text-align: center;">
+            <h4 style="margin: 0; font-size: 0.9rem; opacity: 0.9;">Total Fines</h4>
+            <p style="margin: 0.5rem 0 0 0; font-size: 2rem; font-weight: bold;">₹{{ "%.2f"|format(total_fines) }}</p>
+        </div>
+        <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 1.5rem; border-radius: 10px; text-align: center;">
+            <h4 style="margin: 0; font-size: 0.9rem; opacity: 0.9;">Outstanding</h4>
+            <p style="margin: 0.5rem 0 0 0; font-size: 2rem; font-weight: bold;">₹{{ "%.2f"|format(total_outstanding) }}</p>
+        </div>
+        <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 1.5rem; border-radius: 10px; text-align: center;">
+            <h4 style="margin: 0; font-size: 0.9rem; opacity: 0.9;">Collected</h4>
+            <p style="margin: 0.5rem 0 0 0; font-size: 2rem; font-weight: bold;">₹{{ "%.2f"|format(total_collected) }}</p>
+        </div>
+    </div>
+</div>
+
+<div class="table-container">
+    <h3>All Fines</h3>
+    {% if issues %}
+    <table>
+        <thead>
+            <tr>
+                <th>Issue ID</th>
+                <th>Student</th>
+                <th>Book</th>
+                <th>Issue Date</th>
+                <th>Due Date</th>
+                <th>Return Date</th>
+                <th>Days Late</th>
+                <th>Fine Amount</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for issue in issues %}
+            <tr {% if not issue.returned %}class="overdue"{% endif %}>
+                <td>{{ issue.id }}</td>
+                <td>{{ issue.student.name }}</td>
+                <td>{{ issue.book.title }}</td>
+                <td>{{ issue.issue_date.strftime('%Y-%m-%d') }}</td>
+                <td>{{ issue.due_date.strftime('%Y-%m-%d') }}</td>
+                <td>
+                    {% if issue.return_date %}
+                        {{ issue.return_date.strftime('%Y-%m-%d') }}
+                    {% else %}
+                        <span style="color: #e74c3c; font-weight: bold;">Not Returned</span>
+                    {% endif %}
+                </td>
+                <td>{{ issue.get_days_late() }}</td>
+                <td>
+                    <span class="fine-amount">₹{{ "%.2f"|format(issue.fine) }}</span>
+                </td>
+                <td>
+                    {% if issue.returned %}
+                        <span class="status-badge available">Paid</span>
+                    {% else %}
+                        <span class="status-badge unavailable">Outstanding</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="no-data">No fines recorded yet.</p>
+    {% endif %}
+</div>
+
+<div class="info-box">
+    <h4>Fine Calculation Information</h4>
+    <ul>
+        <li>Default fine rate: ₹50.00 per day</li>
+        <li>Fines are calculated from the day after the due date</li>
+        <li>Use the manual calculator above to estimate fines for different scenarios</li>
+        <li>Outstanding fines must be collected when books are returned</li>
+        <li>All fines are automatically calculated when books are returned</li>
+    </ul>
+</div>
+{% endblock %}
