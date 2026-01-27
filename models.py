@@ -39,8 +39,15 @@ class Issue(db.Model):
 
     def __init__(self, **kwargs):
         super(Issue, self).__init__(**kwargs)
-        if not self.due_date:
-            self.due_date = datetime.utcnow() + timedelta(days=14)
+        if not self.due_date and self.book_id:
+            # Get the associated book to determine due date
+            book = Book.query.get(self.book_id)
+            if book and book.duration_type == 'specific' and book.duration_days:
+                # Use book's specific duration
+                self.due_date = datetime.utcnow() + timedelta(days=book.duration_days)
+            else:
+                # Default to 14 days for semester books or if no duration specified
+                self.due_date = datetime.utcnow() + timedelta(days=14)
 
     def calculate_fine(self):
         if self.returned and self.return_date:
