@@ -31,6 +31,22 @@ def fine_calculator():
 @bp.route('/calculate', methods=['POST'])
 def calculate_fine():
     """Calculate fine based on manual input"""
+    # Get all issues with fines for the template
+    all_issues = Issue.query.all()
+    
+    # Calculate current fines
+    for issue in all_issues:
+        issue.calculate_fine()
+    db.session.commit()
+    
+    # Get issues with fines
+    issues_with_fines = [issue for issue in all_issues if issue.fine > 0]
+    
+    # Calculate total fines
+    total_fines = sum(issue.fine for issue in issues_with_fines)
+    total_outstanding = sum(issue.fine for issue in issues_with_fines if not issue.returned)
+    total_collected = sum(issue.fine for issue in issues_with_fines if issue.returned)
+    
     try:
         days_late = int(request.form.get('days_late', 0))
         fine_rate = float(request.form.get('fine_rate', 5.0))
@@ -38,6 +54,10 @@ def calculate_fine():
         calculated_fine = days_late * fine_rate
         
         return render_template('fine_calculator.html',
+                             issues=issues_with_fines,
+                             total_fines=total_fines,
+                             total_outstanding=total_outstanding,
+                             total_collected=total_collected,
                              manual_calculation={
                                  'days_late': days_late,
                                  'fine_rate': fine_rate,
@@ -45,4 +65,8 @@ def calculate_fine():
                              })
     except (ValueError, TypeError):
         return render_template('fine_calculator.html',
+                             issues=issues_with_fines,
+                             total_fines=total_fines,
+                             total_outstanding=total_outstanding,
+                             total_collected=total_collected,
                              error="Invalid input. Please enter valid numbers.")
