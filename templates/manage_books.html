@@ -47,11 +47,15 @@
 
 <script>
 function toggleDurationDays() {
-    var durationType = document.getElementById('duration_type').value;
-    var durationDaysGroup = document.getElementById('duration_days_group');
-    var durationDaysInput = document.getElementById('duration_days');
+    const durationType = document.getElementById('duration_type');
+    const durationDaysGroup = document.getElementById('duration_days_group');
+    const durationDaysInput = document.getElementById('duration_days');
     
-    if (durationType === 'specific') {
+    if (!durationType || !durationDaysGroup || !durationDaysInput) {
+        return;
+    }
+    
+    if (durationType.value === 'specific') {
         durationDaysGroup.style.display = 'block';
         durationDaysInput.required = true;
     } else {

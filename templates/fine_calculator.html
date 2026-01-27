@@ -88,13 +88,7 @@
                         <span style="color: #e74c3c; font-weight: bold;">Not Returned</span>
                     {% endif %}
                 </td>
-                <td>
-                    {% if issue.return_date %}
-                        {{ (issue.return_date - issue.due_date).days if issue.return_date > issue.due_date else 0 }}
-                    {% else %}
-                        {{ (current_time - issue.due_date).days if current_time > issue.due_date else 0 }}
-                    {% endif %}
-                </td>
+                <td>{{ issue.get_days_late() }}</td>
                 <td>
                     <span class="fine-amount">${{ "%.2f"|format(issue.fine) }}</span>
                 </td>

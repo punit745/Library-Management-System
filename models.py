@@ -39,15 +39,20 @@ class Issue(db.Model):
 
     def __init__(self, **kwargs):
         super(Issue, self).__init__(**kwargs)
-        if not self.due_date and self.book_id:
-            # Get the associated book to determine due date
+        if not self.due_date:
+            # Set default due date, will be updated after commit
+            self.due_date = datetime.utcnow() + timedelta(days=14)
+    
+    def set_due_date_from_book(self):
+        """Set due date based on the associated book's duration settings"""
+        if self.book_id:
             book = Book.query.get(self.book_id)
             if book and book.duration_type == 'specific' and book.duration_days:
                 # Use book's specific duration
-                self.due_date = datetime.utcnow() + timedelta(days=book.duration_days)
+                self.due_date = self.issue_date + timedelta(days=book.duration_days)
             else:
                 # Default to 14 days for semester books or if no duration specified
-                self.due_date = datetime.utcnow() + timedelta(days=14)
+                self.due_date = self.issue_date + timedelta(days=14)
 
     def calculate_fine(self):
         if self.returned and self.return_date:
@@ -58,6 +63,16 @@ class Issue(db.Model):
             if datetime.utcnow() > self.due_date:
                 days_late = (datetime.utcnow() - self.due_date).days
                 self.fine = days_late * 5.0
+    
+    def get_days_late(self):
+        """Get the number of days this issue is/was late"""
+        if self.returned and self.return_date:
+            if self.return_date > self.due_date:
+                return (self.return_date - self.due_date).days
+        elif not self.returned:
+            if datetime.utcnow() > self.due_date:
+                return (datetime.utcnow() - self.due_date).days
+        return 0
 
     def __repr__(self):
         return f'<Issue {self.id}>'

@@ -32,6 +32,8 @@ def issue_book():
             
             try:
                 db.session.add(issue)
+                db.session.flush()  # Flush to assign ID but don't commit yet
+                issue.set_due_date_from_book()  # Set due date based on book
                 db.session.commit()
                 flash(f'Book "{book.title}" issued to {student.name} successfully!', 'success')
             except Exception as e:
