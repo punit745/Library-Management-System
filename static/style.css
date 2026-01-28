@@ -362,6 +362,21 @@ tr:hover {
     color: #555;
 }
 
+/* Search Box */
+.search-box {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+}
+
+.search-box:focus {
+    outline: none;
+    border-color: #3498db;
+}
+
 /* Footer */
 footer {
     background-color: #2c3e50;

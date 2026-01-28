@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from models import db, Student
+import random
 
 bp = Blueprint('students', __name__, url_prefix='/students')
 
@@ -18,7 +19,6 @@ def manage_students():
 
 @bp.route('/add', methods=['POST'])
 def add_student():
-    import random
     name = request.form.get('name')
     email = request.form.get('email')
     course = request.form.get('course')

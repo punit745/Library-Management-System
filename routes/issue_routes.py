@@ -42,6 +42,10 @@ def issue_book():
             if issue_duration and issue_duration != 'default':
                 try:
                     duration = int(issue_duration)
+                    # Validate duration is positive and reasonable (max 365 days)
+                    if duration < 1 or duration > 365:
+                        flash('Duration must be between 1 and 365 days!', 'error')
+                        return redirect(url_for('issues.issue_books'))
                 except ValueError:
                     flash('Invalid duration value!', 'error')
                     return redirect(url_for('issues.issue_books'))

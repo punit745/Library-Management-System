@@ -10,8 +10,9 @@
 <div class="form-card">
     <h3>Issue New Book</h3>
     <div class="form-group" style="margin-bottom: 1rem;">
+        <label for="student-search" style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Search Student:</label>
         <form method="GET" action="{{ url_for('issues.issue_books') }}">
-            <input type="text" name="search" placeholder="Search student by name or admission number..." value="{{ search_query if search_query else '' }}" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 5px;">
+            <input type="text" id="student-search" name="search" class="search-box" placeholder="Search student by name or admission number..." value="{{ search_query if search_query else '' }}" aria-label="Search student by name or admission number">
         </form>
     </div>
     <form method="POST" action="{{ url_for('issues.issue_book') }}">
@@ -106,7 +107,7 @@
     <ul>
         <li>Books can be issued for custom durations: 7 days, 15 days, 30 days, or whole semester (90 days)</li>
         <li>Default duration for semester books is 14 days unless custom duration is selected</li>
-        <li>After the due date, students have a 12-day grace period to return or re-issue the book</li>
+        <li>Students have a 12-day grace period starting from the due date to return or re-issue the book</li>
         <li>After the grace period expires, a fine of ₹20 per day is automatically applied</li>
         <li>Track days issued and grace days remaining for each book</li>
         <li>Search students by name or admission number for quick book issuing</li>
