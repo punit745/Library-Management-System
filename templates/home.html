@@ -3,49 +3,79 @@
 {% block title %}Home - Library Management System{% endblock %}
 
 {% block content %}
-<div class="hero">
-    <h1>Welcome to Library Management System</h1>
-    <p>Streamline your library operations for colleges and universities</p>
+<div class="hero-classic">
+    <div class="hero-content">
+        <img src="{{ url_for('static', filename='logo.svg') }}" alt="Library Management System logo" class="hero-logo">
+        <h1>Library Management System</h1>
+        <p class="hero-subtitle">Efficient • Organized • Modern</p>
+    </div>
 </div>
 
-<div class="features">
-    <div class="feature-card">
+<div class="features-classic">
+    <div class="feature-card-classic">
+        <div class="feature-icon">📚</div>
         <h3>Book Management</h3>
-        <p>Add, update, and manage your library's book collection efficiently</p>
-        <a href="{{ url_for('books.manage_books') }}" class="btn">Manage Books</a>
+        <p>Organize and track your library's complete book collection</p>
+        <a href="{{ url_for('books.manage_books') }}" class="btn-classic">Manage Books</a>
     </div>
 
-    <div class="feature-card">
-        <h3>Student Management</h3>
-        <p>Track student profiles, courses, and borrowing history</p>
-        <a href="{{ url_for('students.manage_students') }}" class="btn">Manage Students</a>
+    <div class="feature-card-classic">
+        <div class="feature-icon">👥</div>
+        <h3>Student Records</h3>
+        <p>Maintain student profiles with admission numbers</p>
+        <a href="{{ url_for('students.manage_students') }}" class="btn-classic">Manage Students</a>
     </div>
 
-    <div class="feature-card">
+    <div class="feature-card-classic">
+        <div class="feature-icon">🔄</div>
         <h3>Issue & Return</h3>
-        <p>Issue books to students and manage returns with automatic fine calculation</p>
-        <a href="{{ url_for('issues.issue_books') }}" class="btn">Issue Books</a>
+        <p>Seamless book issuing with automatic fine tracking</p>
+        <a href="{{ url_for('issues.issue_books') }}" class="btn-classic">Issue Books</a>
     </div>
     
-    <div class="feature-card">
+    <div class="feature-card-classic">
+        <div class="feature-icon">💰</div>
         <h3>Fine Calculator</h3>
-        <p>Calculate fines for overdue books and manage penalties</p>
-        <a href="{{ url_for('fines.fine_calculator') }}" class="btn">Calculate Fines</a>
+        <p>Calculate and manage overdue book penalties</p>
+        <a href="{{ url_for('fines.fine_calculator') }}" class="btn-classic">Calculate Fines</a>
     </div>
 </div>
 
-<div class="info-section">
+<div class="info-section-classic">
     <h2>Key Features</h2>
-    <ul>
-        <li>Comprehensive student profile management</li>
-        <li>Book categorization (textbooks and reference books)</li>
-        <li>Automatic fine calculation for overdue books</li>
-        <li>Course-book correlation for curriculum mapping</li>
-        <li>Track issued books and due dates</li>
-        <li>Book duration tracking (semester vs specific period)</li>
-        <li>Pre-loaded book and student databases</li>
-        <li>Dedicated fine calculator tool</li>
-        <li>Easy-to-use interface for library staff</li>
-    </ul>
+    <div class="features-grid">
+        <div class="feature-item">
+            <span class="checkmark">✓</span>
+            <span>Student admission number system (8-digit unique ID)</span>
+        </div>
+        <div class="feature-item">
+            <span class="checkmark">✓</span>
+            <span>Flexible book duration (7, 15, 30, 90 days)</span>
+        </div>
+        <div class="feature-item">
+            <span class="checkmark">✓</span>
+            <span>12-day grace period for returns and re-issues</span>
+        </div>
+        <div class="feature-item">
+            <span class="checkmark">✓</span>
+            <span>Automatic fine calculation (₹20/day after grace period)</span>
+        </div>
+        <div class="feature-item">
+            <span class="checkmark">✓</span>
+            <span>Advanced search for students and books</span>
+        </div>
+        <div class="feature-item">
+            <span class="checkmark">✓</span>
+            <span>Real-time book availability tracking</span>
+        </div>
+        <div class="feature-item">
+            <span class="checkmark">✓</span>
+            <span>Course-book correlation for curriculum mapping</span>
+        </div>
+        <div class="feature-item">
+            <span class="checkmark">✓</span>
+            <span>Days issued and grace period monitoring</span>
+        </div>
+    </div>
 </div>
 {% endblock %}

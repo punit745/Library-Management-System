@@ -6,7 +6,16 @@ bp = Blueprint('issues', __name__, url_prefix='/issues')
 
 @bp.route('/')
 def issue_books():
-    students = Student.query.all()
+    search_query = request.args.get('search', '')
+    
+    if search_query:
+        students = Student.query.filter(
+            (Student.name.ilike(f'%{search_query}%')) |
+            (Student.admission_number.ilike(f'%{search_query}%'))
+        ).all()
+    else:
+        students = Student.query.all()
+    
     books = Book.query.filter_by(available=True).all()
     issues = Issue.query.filter_by(returned=False).all()
     
@@ -15,19 +24,46 @@ def issue_books():
         issue.calculate_fine()
     db.session.commit()
     
-    return render_template('issue_books.html', students=students, books=books, issues=issues)
+    return render_template('issue_books.html', students=students, books=books, issues=issues, search_query=search_query)
 
 @bp.route('/issue', methods=['POST'])
 def issue_book():
     student_id = request.form.get('student_id')
     book_id = request.form.get('book_id')
+    barcode_input = request.form.get('barcode_scan')
+    issue_duration = request.form.get('issue_duration')
+    
+    # If barcode is provided, find the book by barcode
+    if barcode_input:
+        book = Book.query.filter(
+            (Book.barcode == barcode_input) | 
+            (Book.book_code == barcode_input)
+        ).first()
+        if book:
+            book_id = book.id
+        else:
+            flash(f'No book found with barcode/code: {barcode_input}', 'error')
+            return redirect(url_for('issues.issue_books'))
     
     if student_id and book_id:
         student = Student.query.get(student_id)
         book = Book.query.get(book_id)
         
         if student and book and book.available:
-            issue = Issue(student_id=student_id, book_id=book_id)
+            # Create issue with custom duration if provided
+            duration = None
+            if issue_duration and issue_duration != 'default':
+                try:
+                    duration = int(issue_duration)
+                    # Validate duration is positive and reasonable (max 365 days)
+                    if duration < 1 or duration > 365:
+                        flash('Duration must be between 1 and 365 days!', 'error')
+                        return redirect(url_for('issues.issue_books'))
+                except ValueError:
+                    flash('Invalid duration value!', 'error')
+                    return redirect(url_for('issues.issue_books'))
+            
+            issue = Issue(student_id=student_id, book_id=book_id, issue_duration=duration)
             book.available = False
             
             try:
@@ -35,7 +71,7 @@ def issue_book():
                 db.session.flush()  # Flush to assign ID but don't commit yet
                 issue.set_due_date_from_book()  # Set due date based on book
                 db.session.commit()
-                flash(f'Book "{book.title}" issued to {student.name} successfully!', 'success')
+                flash(f'Book "{book.title}" (Code: {book.book_code}) issued to {student.name} successfully!', 'success')
             except Exception as e:
                 db.session.rollback()
                 flash(f'Error issuing book: {str(e)}', 'error')
@@ -61,13 +97,56 @@ def return_book(id):
         try:
             db.session.commit()
             if issue.fine > 0:
-                flash(f'Book returned successfully! Fine: ₹{issue.fine:.2f}', 'warning')
+                flash(f'Book "{book.title}" (Code: {book.book_code}) returned successfully! Fine: ₹{issue.fine:.2f}', 'warning')
             else:
-                flash('Book returned successfully!', 'success')
+                flash(f'Book "{book.title}" (Code: {book.book_code}) returned successfully!', 'success')
         except Exception as e:
             db.session.rollback()
             flash(f'Error returning book: {str(e)}', 'error')
     else:
         flash('Book already returned!', 'error')
+    
+    return redirect(url_for('issues.issue_books'))
+
+@bp.route('/return-by-barcode', methods=['POST'])
+def return_book_by_barcode():
+    barcode_input = request.form.get('return_barcode')
+    
+    if not barcode_input:
+        flash('Please enter a barcode or book code!', 'error')
+        return redirect(url_for('issues.issue_books'))
+    
+    # Find the book by barcode or book code
+    book = Book.query.filter(
+        (Book.barcode == barcode_input) | 
+        (Book.book_code == barcode_input)
+    ).first()
+    
+    if not book:
+        flash(f'No book found with barcode/code: {barcode_input}', 'error')
+        return redirect(url_for('issues.issue_books'))
+    
+    # Find active issue for this book
+    issue = Issue.query.filter_by(book_id=book.id, returned=False).first()
+    
+    if not issue:
+        flash(f'Book "{book.title}" (Code: {book.book_code}) is not currently issued!', 'error')
+        return redirect(url_for('issues.issue_books'))
+    
+    # Return the book
+    issue.returned = True
+    issue.return_date = datetime.utcnow()
+    issue.calculate_fine()
+    book.available = True
+    
+    try:
+        db.session.commit()
+        if issue.fine > 0:
+            flash(f'Book "{book.title}" (Code: {book.book_code}) returned successfully! Fine: ₹{issue.fine:.2f}', 'warning')
+        else:
+            flash(f'Book "{book.title}" (Code: {book.book_code}) returned successfully!', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error returning book: {str(e)}', 'error')
     
     return redirect(url_for('issues.issue_books'))

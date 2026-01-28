@@ -9,7 +9,10 @@
 <body>
     <nav class="navbar">
         <div class="nav-container">
-            <h1 class="nav-logo">Library Management System</h1>
+            <div class="nav-logo-container">
+                <img src="{{ url_for('static', filename='logo.svg') }}" alt="Library Management System logo" class="nav-logo-img">
+                <h1 class="nav-logo">Library Management</h1>
+            </div>
             <ul class="nav-menu">
                 <li><a href="{{ url_for('index') }}">Home</a></li>
                 <li><a href="{{ url_for('students.manage_students') }}">Students</a></li>
