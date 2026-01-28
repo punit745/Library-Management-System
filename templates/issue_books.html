@@ -15,6 +15,7 @@
             <input type="text" id="student-search" name="search" class="search-box" placeholder="Search student by name or admission number..." value="{{ search_query if search_query else '' }}" aria-label="Search student by name or admission number">
         </form>
     </div>
+    
     <form method="POST" action="{{ url_for('issues.issue_book') }}">
         <div class="form-group">
             <label for="student_id">Select Student:</label>
@@ -25,15 +26,26 @@
                 {% endfor %}
             </select>
         </div>
+        
+        <div class="barcode-section" style="background-color: #f0f8ff; padding: 1rem; border-radius: 5px; margin-bottom: 1rem; border-left: 4px solid #3498db;">
+            <h4 style="margin-bottom: 0.5rem; color: #2c3e50;">📷 Scan Barcode (Optional)</h4>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label for="barcode_scan">Enter Book Code or Barcode:</label>
+                <input type="text" id="barcode_scan" name="barcode_scan" placeholder="e.g., 010001 or LIB010001" style="font-family: monospace;">
+                <small style="color: #666;">If provided, this will override the book selection below</small>
+            </div>
+        </div>
+        
         <div class="form-group">
-            <label for="book_id">Select Book:</label>
-            <select id="book_id" name="book_id" required>
+            <label for="book_id">OR Select Book Manually:</label>
+            <select id="book_id" name="book_id">
                 <option value="">Choose a book</option>
                 {% for book in books %}
-                <option value="{{ book.id }}">{{ book.title }} by {{ book.author }} ({{ book.book_type }})</option>
+                <option value="{{ book.id }}">{{ book.book_code }} - {{ book.title }} by {{ book.author }} ({{ book.book_type }})</option>
                 {% endfor %}
             </select>
         </div>
+        
         <div class="form-group">
             <label for="issue_duration">Issue Duration:</label>
             <select id="issue_duration" name="issue_duration">
@@ -48,6 +60,18 @@
     </form>
 </div>
 
+<div class="form-card" style="background-color: #f0fff0; border-left: 4px solid #27ae60;">
+    <h3>📥 Return Book by Barcode</h3>
+    <p style="color: #666; margin-bottom: 1rem;">Scan or enter the book code/barcode to quickly return a book</p>
+    <form method="POST" action="{{ url_for('issues.return_book_by_barcode') }}">
+        <div class="form-group">
+            <label for="return_barcode">Book Code or Barcode:</label>
+            <input type="text" id="return_barcode" name="return_barcode" placeholder="e.g., 010001 or LIB010001" required style="font-family: monospace; font-size: 1.1rem;">
+        </div>
+        <button type="submit" class="btn btn-success">Return Book</button>
+    </form>
+</div>
+
 <div class="table-container">
     <h3>Currently Issued Books</h3>
     {% if issues %}
@@ -55,6 +79,7 @@
         <thead>
             <tr>
                 <th>Issue ID</th>
+                <th>Book Code</th>
                 <th>Student (Admission No.)</th>
                 <th>Book</th>
                 <th>Issue Date</th>
@@ -69,6 +94,7 @@
             {% for issue in issues %}
             <tr {% if issue.fine > 0 %}class="overdue"{% endif %}>
                 <td>{{ issue.id }}</td>
+                <td><code style="font-weight: bold;">{{ issue.book.book_code }}</code></td>
                 <td>{{ issue.student.name }}<br><small>({{ issue.student.admission_number }})</small></td>
                 <td>{{ issue.book.title }}</td>
                 <td>{{ issue.issue_date.strftime('%Y-%m-%d') }}</td>
@@ -105,6 +131,8 @@
 <div class="info-box">
     <h4>Information</h4>
     <ul>
+        <li><strong>Barcode System:</strong> Each book has a unique 6-digit code (2-digit category + 4-digit number) and barcode</li>
+        <li><strong>Quick Issue/Return:</strong> Scan or enter book code/barcode to quickly issue or return books</li>
         <li>Books can be issued for custom durations: 7 days, 15 days, 30 days, or whole semester (90 days)</li>
         <li>Default duration for semester books is 14 days unless custom duration is selected</li>
         <li>Students have a 12-day grace period starting from the due date to return or re-issue the book</li>

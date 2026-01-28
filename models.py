@@ -15,18 +15,67 @@ class Student(db.Model):
         return f'<Student {self.name}>'
 
 class Book(db.Model):
+    # Category code mapping for different book categories
+    CATEGORY_CODES = {
+        'technology': '01',
+        'medical': '02',
+        'science': '03',
+        'arts': '04',
+        'business': '05',
+        'engineering': '06',
+        'mathematics': '07',
+        'literature': '08',
+        'history': '09',
+        'general': '10'
+    }
+    
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200), nullable=False)
     author = db.Column(db.String(100), nullable=False)
     book_type = db.Column(db.String(50), nullable=False)  # textbook or reference
+    category = db.Column(db.String(50), nullable=False, default='general')  # Book category for code generation
     course = db.Column(db.String(100), nullable=True)  # Course correlation
     duration_type = db.Column(db.String(50), nullable=False, default='semester')  # semester or specific
     duration_days = db.Column(db.Integer, nullable=True)  # For specific period books
+    book_code = db.Column(db.String(6), unique=True, nullable=False)  # 6-digit unique code (category + number)
+    barcode = db.Column(db.String(20), unique=True, nullable=True)  # Barcode representation
     available = db.Column(db.Boolean, default=True)
     issues = db.relationship('Issue', backref='book', lazy=True)
 
     def __repr__(self):
         return f'<Book {self.title}>'
+    
+    @staticmethod
+    def generate_book_code(category):
+        """Generate a unique 6-digit book code based on category and sequential number"""
+        category_code = Book.CATEGORY_CODES.get(category.lower(), '10')  # Default to general
+        
+        # Find the highest book number for this category
+        books_in_category = Book.query.filter(Book.book_code.like(f'{category_code}%')).all()
+        
+        if books_in_category:
+            # Extract the numeric part (last 4 digits) and find the max
+            max_number = 0
+            for book in books_in_category:
+                if book.book_code and len(book.book_code) == 6:
+                    try:
+                        num = int(book.book_code[2:])
+                        max_number = max(max_number, num)
+                    except ValueError:
+                        continue
+            next_number = max_number + 1
+        else:
+            next_number = 1
+        
+        # Format as 4-digit number with leading zeros
+        book_number = str(next_number).zfill(4)
+        return f'{category_code}{book_number}'
+    
+    def generate_barcode(self):
+        """Generate barcode string from book code"""
+        if self.book_code:
+            # Simple barcode representation - in real system would use actual barcode format
+            self.barcode = f'LIB{self.book_code}'
 
 class Issue(db.Model):
     DEFAULT_DURATION_DAYS = 14  # Default duration for semester books

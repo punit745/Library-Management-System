@@ -30,7 +30,20 @@ def issue_books():
 def issue_book():
     student_id = request.form.get('student_id')
     book_id = request.form.get('book_id')
+    barcode_input = request.form.get('barcode_scan')
     issue_duration = request.form.get('issue_duration')
+    
+    # If barcode is provided, find the book by barcode
+    if barcode_input:
+        book = Book.query.filter(
+            (Book.barcode == barcode_input) | 
+            (Book.book_code == barcode_input)
+        ).first()
+        if book:
+            book_id = book.id
+        else:
+            flash(f'No book found with barcode/code: {barcode_input}', 'error')
+            return redirect(url_for('issues.issue_books'))
     
     if student_id and book_id:
         student = Student.query.get(student_id)
@@ -58,7 +71,7 @@ def issue_book():
                 db.session.flush()  # Flush to assign ID but don't commit yet
                 issue.set_due_date_from_book()  # Set due date based on book
                 db.session.commit()
-                flash(f'Book "{book.title}" issued to {student.name} successfully!', 'success')
+                flash(f'Book "{book.title}" (Code: {book.book_code}) issued to {student.name} successfully!', 'success')
             except Exception as e:
                 db.session.rollback()
                 flash(f'Error issuing book: {str(e)}', 'error')
@@ -84,13 +97,56 @@ def return_book(id):
         try:
             db.session.commit()
             if issue.fine > 0:
-                flash(f'Book returned successfully! Fine: ₹{issue.fine:.2f}', 'warning')
+                flash(f'Book "{book.title}" (Code: {book.book_code}) returned successfully! Fine: ₹{issue.fine:.2f}', 'warning')
             else:
-                flash('Book returned successfully!', 'success')
+                flash(f'Book "{book.title}" (Code: {book.book_code}) returned successfully!', 'success')
         except Exception as e:
             db.session.rollback()
             flash(f'Error returning book: {str(e)}', 'error')
     else:
         flash('Book already returned!', 'error')
+    
+    return redirect(url_for('issues.issue_books'))
+
+@bp.route('/return-by-barcode', methods=['POST'])
+def return_book_by_barcode():
+    barcode_input = request.form.get('return_barcode')
+    
+    if not barcode_input:
+        flash('Please enter a barcode or book code!', 'error')
+        return redirect(url_for('issues.issue_books'))
+    
+    # Find the book by barcode or book code
+    book = Book.query.filter(
+        (Book.barcode == barcode_input) | 
+        (Book.book_code == barcode_input)
+    ).first()
+    
+    if not book:
+        flash(f'No book found with barcode/code: {barcode_input}', 'error')
+        return redirect(url_for('issues.issue_books'))
+    
+    # Find active issue for this book
+    issue = Issue.query.filter_by(book_id=book.id, returned=False).first()
+    
+    if not issue:
+        flash(f'Book "{book.title}" (Code: {book.book_code}) is not currently issued!', 'error')
+        return redirect(url_for('issues.issue_books'))
+    
+    # Return the book
+    issue.returned = True
+    issue.return_date = datetime.utcnow()
+    issue.calculate_fine()
+    book.available = True
+    
+    try:
+        db.session.commit()
+        if issue.fine > 0:
+            flash(f'Book "{book.title}" (Code: {book.book_code}) returned successfully! Fine: ₹{issue.fine:.2f}', 'warning')
+        else:
+            flash(f'Book "{book.title}" (Code: {book.book_code}) returned successfully!', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error returning book: {str(e)}', 'error')
     
     return redirect(url_for('issues.issue_books'))

@@ -27,6 +27,23 @@
             </select>
         </div>
         <div class="form-group">
+            <label for="category">Category (for book code):</label>
+            <select id="category" name="category" required>
+                <option value="">Select Category</option>
+                <option value="technology">Technology (Code: 01)</option>
+                <option value="medical">Medical (Code: 02)</option>
+                <option value="science">Science (Code: 03)</option>
+                <option value="arts">Arts (Code: 04)</option>
+                <option value="business">Business (Code: 05)</option>
+                <option value="engineering">Engineering (Code: 06)</option>
+                <option value="mathematics">Mathematics (Code: 07)</option>
+                <option value="literature">Literature (Code: 08)</option>
+                <option value="history">History (Code: 09)</option>
+                <option value="general">General (Code: 10)</option>
+            </select>
+            <small style="color: #666;">Category determines the first 2 digits of the 6-digit book code</small>
+        </div>
+        <div class="form-group">
             <label for="course">Related Course (Optional):</label>
             <input type="text" id="course" name="course" placeholder="e.g., Computer Science">
         </div>
@@ -71,7 +88,7 @@ function toggleDurationDays() {
     <div class="form-group" style="margin-bottom: 1rem;">
         <label for="book-search" style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Search Books:</label>
         <form method="GET" action="{{ url_for('books.manage_books') }}">
-            <input type="text" id="book-search" name="search" class="search-box" placeholder="Search by title or author..." value="{{ search_query if search_query else '' }}" aria-label="Search books by title or author">
+            <input type="text" id="book-search" name="search" class="search-box" placeholder="Search by title, author, book code, or barcode..." value="{{ search_query if search_query else '' }}" aria-label="Search books by title, author, book code, or barcode">
         </form>
     </div>
     {% if books %}
@@ -79,9 +96,12 @@ function toggleDurationDays() {
         <thead>
             <tr>
                 <th>ID</th>
+                <th>Book Code</th>
+                <th>Barcode</th>
                 <th>Title</th>
                 <th>Author</th>
                 <th>Type</th>
+                <th>Category</th>
                 <th>Course</th>
                 <th>Duration</th>
                 <th>Status</th>
@@ -92,9 +112,12 @@ function toggleDurationDays() {
             {% for book in books %}
             <tr>
                 <td>{{ book.id }}</td>
+                <td><strong>{{ book.book_code }}</strong></td>
+                <td><code>{{ book.barcode }}</code></td>
                 <td>{{ book.title }}</td>
                 <td>{{ book.author }}</td>
                 <td>{{ book.book_type }}</td>
+                <td>{{ book.category.title() }}</td>
                 <td>{{ book.course or 'N/A' }}</td>
                 <td>
                     {% if book.duration_type == 'semester' %}

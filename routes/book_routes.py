@@ -9,7 +9,9 @@ def manage_books():
     if search_query:
         books = Book.query.filter(
             (Book.title.ilike(f'%{search_query}%')) |
-            (Book.author.ilike(f'%{search_query}%'))
+            (Book.author.ilike(f'%{search_query}%')) |
+            (Book.book_code.ilike(f'%{search_query}%')) |
+            (Book.barcode.ilike(f'%{search_query}%'))
         ).all()
     else:
         books = Book.query.all()
@@ -20,11 +22,12 @@ def add_book():
     title = request.form.get('title')
     author = request.form.get('author')
     book_type = request.form.get('book_type')
+    category = request.form.get('category', 'general')
     course = request.form.get('course')
     duration_type = request.form.get('duration_type', 'semester')
     duration_days = request.form.get('duration_days')
     
-    if title and author and book_type:
+    if title and author and book_type and category:
         try:
             # Validate duration_days if provided
             duration_days_value = None
@@ -34,17 +37,26 @@ def add_book():
                     flash('Duration days must be a positive number!', 'error')
                     return redirect(url_for('books.manage_books'))
             
+            # Generate unique book code
+            book_code = Book.generate_book_code(category)
+            
             book = Book(
                 title=title, 
                 author=author, 
-                book_type=book_type, 
+                book_type=book_type,
+                category=category,
                 course=course,
                 duration_type=duration_type,
-                duration_days=duration_days_value
+                duration_days=duration_days_value,
+                book_code=book_code
             )
+            
+            # Generate barcode
+            book.generate_barcode()
+            
             db.session.add(book)
             db.session.commit()
-            flash('Book added successfully!', 'success')
+            flash(f'Book added successfully! Book Code: {book_code}, Barcode: {book.barcode}', 'success')
         except ValueError:
             db.session.rollback()
             flash('Invalid duration days. Please enter a valid number!', 'error')
@@ -52,7 +64,7 @@ def add_book():
             db.session.rollback()
             flash(f'Error adding book: {str(e)}', 'error')
     else:
-        flash('Title, author, and type are required!', 'error')
+        flash('Title, author, type, and category are required!', 'error')
     
     return redirect(url_for('books.manage_books'))
 
