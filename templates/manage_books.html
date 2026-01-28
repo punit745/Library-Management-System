@@ -68,6 +68,11 @@ function toggleDurationDays() {
 
 <div class="table-container">
     <h3>All Books</h3>
+    <div class="form-group" style="margin-bottom: 1rem;">
+        <form method="GET" action="{{ url_for('books.manage_books') }}">
+            <input type="text" name="search" placeholder="Search by title or author..." value="{{ search_query if search_query else '' }}" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 5px;">
+        </form>
+    </div>
     {% if books %}
     <table>
         <thead>

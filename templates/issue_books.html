@@ -9,13 +9,18 @@
 
 <div class="form-card">
     <h3>Issue New Book</h3>
+    <div class="form-group" style="margin-bottom: 1rem;">
+        <form method="GET" action="{{ url_for('issues.issue_books') }}">
+            <input type="text" name="search" placeholder="Search student by name or admission number..." value="{{ search_query if search_query else '' }}" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 5px;">
+        </form>
+    </div>
     <form method="POST" action="{{ url_for('issues.issue_book') }}">
         <div class="form-group">
             <label for="student_id">Select Student:</label>
             <select id="student_id" name="student_id" required>
                 <option value="">Choose a student</option>
                 {% for student in students %}
-                <option value="{{ student.id }}">{{ student.name }} ({{ student.course }})</option>
+                <option value="{{ student.id }}">{{ student.admission_number }} - {{ student.name }} ({{ student.course }})</option>
                 {% endfor %}
             </select>
         </div>
@@ -26,6 +31,16 @@
                 {% for book in books %}
                 <option value="{{ book.id }}">{{ book.title }} by {{ book.author }} ({{ book.book_type }})</option>
                 {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="issue_duration">Issue Duration:</label>
+            <select id="issue_duration" name="issue_duration">
+                <option value="default">Default (Book's duration setting)</option>
+                <option value="7">7 days</option>
+                <option value="15">15 days</option>
+                <option value="30">30 days (1 month)</option>
+                <option value="90">90 days (Whole semester)</option>
             </select>
         </div>
         <button type="submit" class="btn btn-primary">Issue Book</button>
@@ -39,10 +54,12 @@
         <thead>
             <tr>
                 <th>Issue ID</th>
-                <th>Student</th>
+                <th>Student (Admission No.)</th>
                 <th>Book</th>
                 <th>Issue Date</th>
                 <th>Due Date</th>
+                <th>Days Issued</th>
+                <th>Grace Days Left</th>
                 <th>Fine</th>
                 <th>Actions</th>
             </tr>
@@ -51,10 +68,18 @@
             {% for issue in issues %}
             <tr {% if issue.fine > 0 %}class="overdue"{% endif %}>
                 <td>{{ issue.id }}</td>
-                <td>{{ issue.student.name }}</td>
+                <td>{{ issue.student.name }}<br><small>({{ issue.student.admission_number }})</small></td>
                 <td>{{ issue.book.title }}</td>
                 <td>{{ issue.issue_date.strftime('%Y-%m-%d') }}</td>
                 <td>{{ issue.due_date.strftime('%Y-%m-%d') }}</td>
+                <td>{{ issue.get_days_issued() }} days</td>
+                <td>
+                    {% if issue.get_grace_days_remaining() > 0 %}
+                        <span style="color: #27ae60;">{{ issue.get_grace_days_remaining() }} days</span>
+                    {% else %}
+                        <span style="color: #e74c3c;">Expired</span>
+                    {% endif %}
+                </td>
                 <td>
                     {% if issue.fine > 0 %}
                         <span class="fine-amount">₹{{ "%.2f"|format(issue.fine) }}</span>
@@ -79,10 +104,12 @@
 <div class="info-box">
     <h4>Information</h4>
     <ul>
-        <li>Books with specific period duration are issued for their specified days</li>
-        <li>Books for whole semester are issued for 14 days by default</li>
-        <li>Late returns incur a fine of ₹50 per day</li>
-        <li>Fines are calculated automatically when books are returned</li>
+        <li>Books can be issued for custom durations: 7 days, 15 days, 30 days, or whole semester (90 days)</li>
+        <li>Default duration for semester books is 14 days unless custom duration is selected</li>
+        <li>After the due date, students have a 12-day grace period to return or re-issue the book</li>
+        <li>After the grace period expires, a fine of ₹20 per day is automatically applied</li>
+        <li>Track days issued and grace days remaining for each book</li>
+        <li>Search students by name or admission number for quick book issuing</li>
         <li>Return books on time to avoid penalties</li>
     </ul>
 </div>

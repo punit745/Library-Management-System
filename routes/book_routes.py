@@ -5,8 +5,15 @@ bp = Blueprint('books', __name__, url_prefix='/books')
 
 @bp.route('/')
 def manage_books():
-    books = Book.query.all()
-    return render_template('manage_books.html', books=books)
+    search_query = request.args.get('search', '')
+    if search_query:
+        books = Book.query.filter(
+            (Book.title.ilike(f'%{search_query}%')) |
+            (Book.author.ilike(f'%{search_query}%'))
+        ).all()
+    else:
+        books = Book.query.all()
+    return render_template('manage_books.html', books=books, search_query=search_query)
 
 @bp.route('/add', methods=['POST'])
 def add_book():

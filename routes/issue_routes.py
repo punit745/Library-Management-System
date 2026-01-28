@@ -6,7 +6,16 @@ bp = Blueprint('issues', __name__, url_prefix='/issues')
 
 @bp.route('/')
 def issue_books():
-    students = Student.query.all()
+    search_query = request.args.get('search', '')
+    
+    if search_query:
+        students = Student.query.filter(
+            (Student.name.ilike(f'%{search_query}%')) |
+            (Student.admission_number.ilike(f'%{search_query}%'))
+        ).all()
+    else:
+        students = Student.query.all()
+    
     books = Book.query.filter_by(available=True).all()
     issues = Issue.query.filter_by(returned=False).all()
     
@@ -15,19 +24,29 @@ def issue_books():
         issue.calculate_fine()
     db.session.commit()
     
-    return render_template('issue_books.html', students=students, books=books, issues=issues)
+    return render_template('issue_books.html', students=students, books=books, issues=issues, search_query=search_query)
 
 @bp.route('/issue', methods=['POST'])
 def issue_book():
     student_id = request.form.get('student_id')
     book_id = request.form.get('book_id')
+    issue_duration = request.form.get('issue_duration')
     
     if student_id and book_id:
         student = Student.query.get(student_id)
         book = Book.query.get(book_id)
         
         if student and book and book.available:
-            issue = Issue(student_id=student_id, book_id=book_id)
+            # Create issue with custom duration if provided
+            duration = None
+            if issue_duration and issue_duration != 'default':
+                try:
+                    duration = int(issue_duration)
+                except ValueError:
+                    flash('Invalid duration value!', 'error')
+                    return redirect(url_for('issues.issue_books'))
+            
+            issue = Issue(student_id=student_id, book_id=book_id, issue_duration=duration)
             book.available = False
             
             try:
