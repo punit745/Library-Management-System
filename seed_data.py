@@ -5,6 +5,7 @@ This script populates the database with initial book and student data
 from app import app
 from models import db, Book, Student
 from datetime import datetime
+import random
 
 # Initial book data
 INITIAL_BOOKS = [
@@ -269,9 +270,22 @@ def seed_database():
         else:
             print("Seeding books...")
             for book_data in INITIAL_BOOKS:
+                # Ensure category is set
+                if 'category' not in book_data:
+                    book_data['category'] = 'general'
+                
+                # Generate book code
+                # Note: In a real app, strict sequential generation might need locking, 
+                # but for seeding it's fine.
+                book_code = Book.generate_book_code(book_data['category'])
+                
                 book = Book(**book_data)
+                book.book_code = book_code
+                book.generate_barcode()
+                
                 db.session.add(book)
-            db.session.commit()
+                # Commit strictly to ensure sequential numbering works if it queries DB
+                db.session.commit()
             print(f"Added {len(INITIAL_BOOKS)} books to the database.")
         
         if Student.query.first() is not None:
@@ -279,7 +293,14 @@ def seed_database():
         else:
             print("Seeding students...")
             for student_data in INITIAL_STUDENTS:
+                # Generate random 8-digit admission number
+                while True:
+                    admission_number = ''.join([str(random.randint(0, 9)) for _ in range(8)])
+                    if not Student.query.filter_by(admission_number=admission_number).first():
+                        break
+                
                 student = Student(**student_data)
+                student.admission_number = admission_number
                 db.session.add(student)
             db.session.commit()
             print(f"Added {len(INITIAL_STUDENTS)} students to the database.")
