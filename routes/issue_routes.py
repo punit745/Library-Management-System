@@ -6,15 +6,8 @@ bp = Blueprint('issues', __name__, url_prefix='/issues')
 
 @bp.route('/')
 def issue_books():
-    search_query = request.args.get('search', '')
-    
-    if search_query:
-        students = Student.query.filter(
-            (Student.name.ilike(f'%{search_query}%')) |
-            (Student.admission_number.ilike(f'%{search_query}%'))
-        ).all()
-    else:
-        students = Student.query.all()
+    # Load all students for client-side filtering
+    students = Student.query.all()
     
     books = Book.query.filter_by(available=True).all()
     issues = Issue.query.filter_by(returned=False).all()
@@ -24,7 +17,7 @@ def issue_books():
         issue.calculate_fine()
     db.session.commit()
     
-    return render_template('issue_books.html', students=students, books=books, issues=issues, search_query=search_query)
+    return render_template('issue_books.html', students=students, books=books, issues=issues, search_query='')
 
 @bp.route('/issue', methods=['POST'])
 def issue_book():

@@ -9,22 +9,17 @@
 
 <div class="form-card">
     <h3>Issue New Book</h3>
-    <div class="form-group" style="margin-bottom: 1rem;">
-        <label for="student-search" style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Search Student:</label>
-        <form method="GET" action="{{ url_for('issues.issue_books') }}">
-            <input type="text" id="student-search" name="search" class="search-box" placeholder="Search student by name or admission number..." value="{{ search_query if search_query else '' }}" aria-label="Search student by name or admission number">
-        </form>
-    </div>
-    
     <form method="POST" action="{{ url_for('issues.issue_book') }}">
-        <div class="form-group">
-            <label for="student_id">Select Student:</label>
+        <div class="form-group search-select-container">
+            <label for="student-search" style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Search & Select Student:</label>
+            <input type="text" id="student-search" class="search-box" placeholder="Type to search by name or admission number..." aria-label="Search student by name or admission number" oninput="filterStudents()">
             <select id="student_id" name="student_id" required>
                 <option value="">Choose a student</option>
                 {% for student in students %}
-                <option value="{{ student.id }}">{{ student.admission_number }} - {{ student.name }} ({{ student.course }})</option>
+                <option value="{{ student.id }}" data-name="{{ student.name|lower }}" data-admission="{{ student.admission_number }}">{{ student.admission_number }} - {{ student.name }} ({{ student.course }})</option>
                 {% endfor %}
             </select>
+            <small style="color: #666; margin-top: 0.3rem; display: block;">Start typing to filter students by name or admission number</small>
         </div>
         
         <div class="barcode-section" style="background-color: #f0f8ff; padding: 1rem; border-radius: 5px; margin-bottom: 1rem; border-left: 4px solid #3498db;">
@@ -142,4 +137,30 @@
         <li>Return books on time to avoid penalties</li>
     </ul>
 </div>
+
+<script>
+function filterStudents() {
+    const searchInput = document.getElementById('student-search');
+    const studentSelect = document.getElementById('student_id');
+    const searchTerm = searchInput.value.toLowerCase().trim();
+    
+    for (let option of studentSelect.options) {
+        if (option.value === '') {
+            option.style.display = '';
+            continue;
+        }
+        
+        const name = option.getAttribute('data-name') || '';
+        const admission = option.getAttribute('data-admission') || '';
+        
+        const matches = name.includes(searchTerm) || admission.includes(searchTerm);
+        option.style.display = matches ? '' : 'none';
+        
+        // Auto-select on exact admission number match
+        if (admission === searchTerm && searchTerm.length > 0) {
+            studentSelect.value = option.value;
+        }
+    }
+}
+</script>
 {% endblock %}
