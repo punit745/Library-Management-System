@@ -31,7 +31,7 @@
 
     <!-- Slide-out Navigation Sidebar -->
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
-    <aside class="sidebar" id="sidebar">
+    <aside class="sidebar" id="sidebar" aria-hidden="true">
         <div class="sidebar-header">
             <img src="{{ url_for('static', filename='logo.svg') }}" alt="BookNest logo" class="sidebar-logo">
             <h2>BookNest</h2>
@@ -87,12 +87,14 @@
 
         function openSidebar() {
             sidebar.classList.add('active');
+            sidebar.setAttribute('aria-hidden', 'false');
             sidebarOverlay.classList.add('active');
             document.body.style.overflow = 'hidden';
         }
 
         function closeSidebar() {
             sidebar.classList.remove('active');
+            sidebar.setAttribute('aria-hidden', 'true');
             sidebarOverlay.classList.remove('active');
             document.body.style.overflow = '';
         }

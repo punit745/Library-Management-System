@@ -12,10 +12,7 @@
     <form method="POST" action="{{ url_for('issues.issue_book') }}">
         <div class="form-group search-select-container">
             <label for="student-search" style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Search & Select Student:</label>
-            <input type="text" id="student-search" class="search-box" placeholder="Type to search by name or admission number..." aria-label="Search student by name or admission number" onkeyup="filterStudents()">
-            {% if search_query %}
-            <p class="filtered-info">Showing results for: "{{ search_query }}"</p>
-            {% endif %}
+            <input type="text" id="student-search" class="search-box" placeholder="Type to search by name or admission number..." aria-label="Search student by name or admission number" oninput="filterStudents()">
             <select id="student_id" name="student_id" required>
                 <option value="">Choose a student</option>
                 {% for student in students %}
@@ -156,19 +153,12 @@ function filterStudents() {
         const name = option.getAttribute('data-name') || '';
         const admission = option.getAttribute('data-admission') || '';
         
-        if (name.includes(searchTerm) || admission.includes(searchTerm)) {
-            option.style.display = '';
-        } else {
-            option.style.display = 'none';
-        }
-    }
-    
-    // If exact admission number match, select it
-    for (let option of studentSelect.options) {
-        const admission = option.getAttribute('data-admission') || '';
-        if (admission === searchTerm && searchTerm.length === 8) {
+        const matches = name.includes(searchTerm) || admission.includes(searchTerm);
+        option.style.display = matches ? '' : 'none';
+        
+        // Auto-select on exact admission number match
+        if (admission === searchTerm && searchTerm.length > 0) {
             studentSelect.value = option.value;
-            break;
         }
     }
 }

@@ -10,7 +10,7 @@
 <div class="profile-container">
     <div class="profile-card">
         <div class="profile-header">
-            <div class="profile-avatar">{{ student.name[0].upper() }}</div>
+            <div class="profile-avatar">{{ student.name[:1].upper() if student.name else '?' }}</div>
             <div class="profile-info">
                 <h2>{{ student.name }}</h2>
                 <p class="admission-badge">Admission No: {{ student.admission_number }}</p>
@@ -71,14 +71,14 @@
                 <td><code style="font-weight: bold;">{{ issue.book.book_code }}</code></td>
                 <td>{{ issue.book.title }}</td>
                 <td>{{ issue.book.book_type }}</td>
-                <td>{{ issue.issue_date.strftime('%Y-%m-%d %H:%M') }}</td>
+                <td>{{ issue.issue_date.strftime('%Y-%m-%d') }}</td>
                 <td>{{ issue.due_date.strftime('%Y-%m-%d') }}</td>
                 <td>{{ issue.get_days_issued() }} days</td>
                 <td>
                     {% if issue.get_grace_days_remaining() > 0 %}
-                        <span style="color: #27ae60;">{{ issue.get_grace_days_remaining() }} days</span>
+                        <span class="status-badge available">{{ issue.get_grace_days_remaining() }} days</span>
                     {% else %}
-                        <span style="color: #e74c3c;">Expired</span>
+                        <span class="status-badge unavailable">Expired</span>
                     {% endif %}
                 </td>
                 <td>

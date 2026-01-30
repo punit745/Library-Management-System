@@ -897,3 +897,8 @@ footer {
     margin-bottom: 0.5rem;
     font-style: italic;
 }
+
+/* Button action spacing */
+.btn-action {
+    margin-right: 0.5rem;
+}
