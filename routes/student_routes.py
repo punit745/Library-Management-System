@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
-from models import db, Student
+from models import db, Student, Issue
 import random
 
 bp = Blueprint('students', __name__, url_prefix='/students')
@@ -77,3 +77,30 @@ def delete_student(id):
         flash(f'Error deleting student: {str(e)}', 'error')
     
     return redirect(url_for('students.manage_students'))
+
+@bp.route('/profile/<admission_number>')
+def student_profile(admission_number):
+    """View detailed profile of a student by admission number"""
+    student = Student.query.filter_by(admission_number=admission_number).first_or_404()
+    
+    # Get all issues for this student
+    issues = Issue.query.filter_by(student_id=student.id).order_by(Issue.issue_date.desc()).all()
+    
+    # Calculate fines for all active issues
+    for issue in issues:
+        issue.calculate_fine()
+    db.session.commit()
+    
+    # Separate current and returned issues
+    current_issues = [issue for issue in issues if not issue.returned]
+    returned_issues = [issue for issue in issues if issue.returned]
+    
+    # Calculate total outstanding fine
+    total_fine = sum(issue.fine for issue in current_issues if issue.fine > 0)
+    
+    return render_template('student_profile.html', 
+                         student=student, 
+                         issues=issues,
+                         current_issues=current_issues,
+                         returned_issues=returned_issues,
+                         total_fine=total_fine)

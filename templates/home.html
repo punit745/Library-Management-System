@@ -1,13 +1,17 @@
 {% extends "base.html" %}
 
-{% block title %}Home - Library Management System{% endblock %}
+{% block title %}Home - BookNest{% endblock %}
 
 {% block content %}
 <div class="hero-classic">
     <div class="hero-content">
-        <img src="{{ url_for('static', filename='logo.svg') }}" alt="Library Management System logo" class="hero-logo">
-        <h1>Library Management System</h1>
-        <p class="hero-subtitle">Efficient • Organized • Modern</p>
+        <img src="{{ url_for('static', filename='logo.svg') }}" alt="BookNest logo" class="hero-logo">
+        <h1>BookNest</h1>
+        <p class="hero-subtitle">Your Knowledge, Organized</p>
+        <div class="hero-quote">
+            <p>"The only thing that you absolutely have to know, is the location of the library."</p>
+            <span class="quote-author">— Albert Einstein</span>
+        </div>
     </div>
 </div>
 
@@ -22,7 +26,7 @@
     <div class="feature-card-classic">
         <div class="feature-icon">👥</div>
         <h3>Student Records</h3>
-        <p>Maintain student profiles with admission numbers</p>
+        <p>Maintain student profiles with admission numbers and borrowing history</p>
         <a href="{{ url_for('students.manage_students') }}" class="btn-classic">Manage Students</a>
     </div>
 
@@ -32,12 +36,23 @@
         <p>Seamless book issuing with automatic fine tracking</p>
         <a href="{{ url_for('issues.issue_books') }}" class="btn-classic">Issue Books</a>
     </div>
-    
-    <div class="feature-card-classic">
-        <div class="feature-icon">💰</div>
-        <h3>Fine Calculator</h3>
-        <p>Calculate and manage overdue book penalties</p>
-        <a href="{{ url_for('fines.fine_calculator') }}" class="btn-classic">Calculate Fines</a>
+</div>
+
+<div class="quote-section">
+    <div class="quote-card">
+        <span class="quote-icon">📖</span>
+        <blockquote>"A library is not a luxury but one of the necessities of life."</blockquote>
+        <cite>— Henry Ward Beecher</cite>
+    </div>
+    <div class="quote-card">
+        <span class="quote-icon">✨</span>
+        <blockquote>"Reading is to the mind what exercise is to the body."</blockquote>
+        <cite>— Joseph Addison</cite>
+    </div>
+    <div class="quote-card">
+        <span class="quote-icon">🌟</span>
+        <blockquote>"Today a reader, tomorrow a leader."</blockquote>
+        <cite>— Margaret Fuller</cite>
     </div>
 </div>
 
@@ -62,7 +77,7 @@
         </div>
         <div class="feature-item">
             <span class="checkmark">✓</span>
-            <span>Advanced search for students and books</span>
+            <span>Detailed student profile with borrowing history</span>
         </div>
         <div class="feature-item">
             <span class="checkmark">✓</span>
@@ -74,7 +89,7 @@
         </div>
         <div class="feature-item">
             <span class="checkmark">✓</span>
-            <span>Days issued and grace period monitoring</span>
+            <span>Integrated fine calculator in student profiles</span>
         </div>
     </div>
 </div>

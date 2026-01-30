@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block title %}{{ student.name }} - Profile | BookNest{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>Student Profile</h2>
+</div>
+
+<div class="profile-container">
+    <div class="profile-card">
+        <div class="profile-header">
+            <div class="profile-avatar">{{ student.name[0].upper() }}</div>
+            <div class="profile-info">
+                <h2>{{ student.name }}</h2>
+                <p class="admission-badge">Admission No: {{ student.admission_number }}</p>
+            </div>
+        </div>
+        
+        <div class="profile-details">
+            <div class="detail-item">
+                <span class="detail-label">Course</span>
+                <span class="detail-value">{{ student.course }}</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Email</span>
+                <span class="detail-value">{{ student.email or 'Not provided' }}</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Total Books Issued</span>
+                <span class="detail-value">{{ issues|length }}</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Currently Borrowed</span>
+                <span class="detail-value">{{ current_issues|length }}</span>
+            </div>
+        </div>
+    </div>
+
+    {% if total_fine > 0 %}
+    <div class="fine-alert">
+        <div class="fine-icon">⚠️</div>
+        <div class="fine-content">
+            <h3>Outstanding Fine</h3>
+            <p class="fine-amount-large">₹{{ "%.2f"|format(total_fine) }}</p>
+            <p class="fine-note">Fine is calculated at ₹20/day after the 12-day grace period expires.</p>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<div class="table-container">
+    <h3>Currently Borrowed Books</h3>
+    {% if current_issues %}
+    <table>
+        <thead>
+            <tr>
+                <th>Book Code</th>
+                <th>Title</th>
+                <th>Type</th>
+                <th>Issue Date</th>
+                <th>Due Date</th>
+                <th>Days Issued</th>
+                <th>Grace Days Left</th>
+                <th>Fine</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for issue in current_issues %}
+            <tr {% if issue.fine > 0 %}class="overdue"{% endif %}>
+                <td><code style="font-weight: bold;">{{ issue.book.book_code }}</code></td>
+                <td>{{ issue.book.title }}</td>
+                <td>{{ issue.book.book_type }}</td>
+                <td>{{ issue.issue_date.strftime('%Y-%m-%d %H:%M') }}</td>
+                <td>{{ issue.due_date.strftime('%Y-%m-%d') }}</td>
+                <td>{{ issue.get_days_issued() }} days</td>
+                <td>
+                    {% if issue.get_grace_days_remaining() > 0 %}
+                        <span style="color: #27ae60;">{{ issue.get_grace_days_remaining() }} days</span>
+                    {% else %}
+                        <span style="color: #e74c3c;">Expired</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if issue.fine > 0 %}
+                        <span class="fine-amount">₹{{ "%.2f"|format(issue.fine) }}</span>
+                    {% else %}
+                        ₹0.00
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="no-data">No books currently borrowed.</p>
+    {% endif %}
+</div>
+
+<div class="table-container">
+    <h3>Borrowing History</h3>
+    {% if returned_issues %}
+    <table>
+        <thead>
+            <tr>
+                <th>Book Code</th>
+                <th>Title</th>
+                <th>Type</th>
+                <th>Issue Date</th>
+                <th>Return Date</th>
+                <th>Duration</th>
+                <th>Fine Paid</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for issue in returned_issues %}
+            <tr>
+                <td><code>{{ issue.book.book_code }}</code></td>
+                <td>{{ issue.book.title }}</td>
+                <td>{{ issue.book.book_type }}</td>
+                <td>{{ issue.issue_date.strftime('%Y-%m-%d') }}</td>
+                <td>{{ issue.return_date.strftime('%Y-%m-%d') if issue.return_date else 'N/A' }}</td>
+                <td>{{ issue.get_days_issued() }} days</td>
+                <td>
+                    {% if issue.fine > 0 %}
+                        <span class="fine-amount">₹{{ "%.2f"|format(issue.fine) }}</span>
+                    {% else %}
+                        ₹0.00
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="no-data">No borrowing history available.</p>
+    {% endif %}
+</div>
+
+<div class="profile-actions">
+    <a href="{{ url_for('students.manage_students') }}" class="btn btn-primary">← Back to Students</a>
+</div>
+{% endblock %}

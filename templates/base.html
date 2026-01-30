@@ -3,25 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Library Management System{% endblock %}</title>
+    <title>{% block title %}BookNest{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <nav class="navbar">
         <div class="nav-container">
-            <div class="nav-logo-container">
-                <img src="{{ url_for('static', filename='logo.svg') }}" alt="Library Management System logo" class="nav-logo-img">
-                <h1 class="nav-logo">Library Management</h1>
+            <div class="nav-left">
+                <button class="hamburger" id="hamburger" aria-label="Toggle navigation menu">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+                <div class="nav-logo-container">
+                    <img src="{{ url_for('static', filename='logo.svg') }}" alt="BookNest logo" class="nav-logo-img">
+                    <h1 class="nav-logo">BookNest</h1>
+                </div>
             </div>
-            <ul class="nav-menu">
+            <ul class="nav-menu" id="navMenu">
                 <li><a href="{{ url_for('index') }}">Home</a></li>
                 <li><a href="{{ url_for('students.manage_students') }}">Students</a></li>
                 <li><a href="{{ url_for('books.manage_books') }}">Books</a></li>
                 <li><a href="{{ url_for('issues.issue_books') }}">Issue/Return</a></li>
-                <li><a href="{{ url_for('fines.fine_calculator') }}">Fine Calculator</a></li>
             </ul>
         </div>
     </nav>
+
+    <!-- Slide-out Navigation Sidebar -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <img src="{{ url_for('static', filename='logo.svg') }}" alt="BookNest logo" class="sidebar-logo">
+            <h2>BookNest</h2>
+            <button class="sidebar-close" id="sidebarClose" aria-label="Close navigation">&times;</button>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="{{ url_for('index') }}" class="sidebar-link">
+                <span class="sidebar-icon">🏠</span>
+                <span>Home</span>
+            </a>
+            <a href="{{ url_for('students.manage_students') }}" class="sidebar-link">
+                <span class="sidebar-icon">👥</span>
+                <span>Students</span>
+            </a>
+            <a href="{{ url_for('books.manage_books') }}" class="sidebar-link">
+                <span class="sidebar-icon">📚</span>
+                <span>Books</span>
+            </a>
+            <a href="{{ url_for('issues.issue_books') }}" class="sidebar-link">
+                <span class="sidebar-icon">🔄</span>
+                <span>Issue/Return</span>
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <p>📖 "A room without books is like a body without a soul." - Cicero</p>
+        </div>
+    </aside>
 
     <div class="container">
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -38,7 +75,38 @@
     </div>
 
     <footer>
-        <p>&copy; 2024 Library Management System. All rights reserved.</p>
+        <p>&copy; 2024 BookNest. All rights reserved.</p>
     </footer>
+
+    <script>
+        // Hamburger menu functionality
+        const hamburger = document.getElementById('hamburger');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        const sidebarClose = document.getElementById('sidebarClose');
+
+        function openSidebar() {
+            sidebar.classList.add('active');
+            sidebarOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeSidebar() {
+            sidebar.classList.remove('active');
+            sidebarOverlay.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        hamburger.addEventListener('click', openSidebar);
+        sidebarClose.addEventListener('click', closeSidebar);
+        sidebarOverlay.addEventListener('click', closeSidebar);
+
+        // Close sidebar on escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeSidebar();
+            }
+        });
+    </script>
 </body>
 </html>
