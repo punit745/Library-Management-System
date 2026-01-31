@@ -6,6 +6,16 @@ bp = Blueprint('issues', __name__, url_prefix='/issues')
 
 @bp.route('/')
 def issue_books():
+    search_query = request.args.get('search', '')
+    
+    # Check if there's a search query and redirect to student profile if exact admission number match
+    if search_query:
+        # Check for exact admission number match
+        student = Student.query.filter_by(admission_number=search_query.strip()).first()
+        if student:
+            # Redirect to student profile for exact admission number match
+            return redirect(url_for('students.student_profile', admission_number=student.admission_number))
+    
     # Load all students for client-side filtering
     students = Student.query.all()
     
@@ -17,7 +27,7 @@ def issue_books():
         issue.calculate_fine()
     db.session.commit()
     
-    return render_template('issue_books.html', students=students, books=books, issues=issues, search_query='')
+    return render_template('issue_books.html', students=students, books=books, issues=issues, search_query=search_query)
 
 @bp.route('/issue', methods=['POST'])
 def issue_book():

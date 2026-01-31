@@ -13,6 +13,15 @@ def manage_students():
             (Student.admission_number.ilike(f'%{search_query}%')) |
             (Student.course.ilike(f'%{search_query}%'))
         ).all()
+        
+        # Redirect to student profile if exactly one match or exact admission number match
+        if len(students) == 1:
+            return redirect(url_for('students.student_profile', admission_number=students[0].admission_number))
+        
+        # Check for exact admission number match
+        exact_match = Student.query.filter_by(admission_number=search_query).first()
+        if exact_match:
+            return redirect(url_for('students.student_profile', admission_number=exact_match.admission_number))
     else:
         students = Student.query.all()
     return render_template('manage_students.html', students=students, search_query=search_query)
@@ -98,9 +107,108 @@ def student_profile(admission_number):
     # Calculate total outstanding fine
     total_fine = sum(issue.fine for issue in current_issues if issue.fine > 0)
     
+    # Get all available books for issuing
+    from models import Book
+    available_books = Book.query.filter_by(available=True).all()
+    
     return render_template('student_profile.html', 
                          student=student, 
                          issues=issues,
                          current_issues=current_issues,
                          returned_issues=returned_issues,
-                         total_fine=total_fine)
+                         total_fine=total_fine,
+                         available_books=available_books)
+
+@bp.route('/profile/<admission_number>/issue', methods=['POST'])
+def issue_book_to_student(admission_number):
+    """Issue a book to a student from their profile page"""
+    student = Student.query.filter_by(admission_number=admission_number).first_or_404()
+    
+    book_id = request.form.get('book_id')
+    barcode_input = request.form.get('barcode_scan')
+    issue_duration = request.form.get('issue_duration')
+    
+    from models import Book
+    
+    # If barcode is provided, find the book by barcode
+    if barcode_input:
+        book = Book.query.filter(
+            (Book.barcode == barcode_input) | 
+            (Book.book_code == barcode_input)
+        ).first()
+        if book:
+            book_id = book.id
+        else:
+            flash(f'No book found with barcode/code: {barcode_input}', 'error')
+            return redirect(url_for('students.student_profile', admission_number=admission_number))
+    
+    if book_id:
+        book = Book.query.get(book_id)
+        
+        if book and book.available:
+            # Create issue with custom duration if provided
+            duration = None
+            if issue_duration and issue_duration != 'default':
+                try:
+                    duration = int(issue_duration)
+                    if duration < 1 or duration > 365:
+                        flash('Duration must be between 1 and 365 days!', 'error')
+                        return redirect(url_for('students.student_profile', admission_number=admission_number))
+                except ValueError:
+                    flash('Invalid duration value!', 'error')
+                    return redirect(url_for('students.student_profile', admission_number=admission_number))
+            
+            issue = Issue(student_id=student.id, book_id=book_id, issue_duration=duration)
+            book.available = False
+            
+            try:
+                db.session.add(issue)
+                db.session.flush()
+                issue.set_due_date_from_book()
+                db.session.commit()
+                flash(f'Book "{book.title}" (Code: {book.book_code}) issued to {student.name} successfully!', 'success')
+            except Exception as e:
+                db.session.rollback()
+                flash(f'Error issuing book: {str(e)}', 'error')
+        else:
+            flash('Invalid book or book not available!', 'error')
+    else:
+        flash('Please select a book!', 'error')
+    
+    return redirect(url_for('students.student_profile', admission_number=admission_number))
+
+@bp.route('/profile/<admission_number>/return/<int:issue_id>', methods=['POST'])
+def return_book_from_profile(admission_number, issue_id):
+    """Return a book from the student profile page"""
+    from datetime import datetime
+    from models import Book
+    
+    student = Student.query.filter_by(admission_number=admission_number).first_or_404()
+    issue = Issue.query.get_or_404(issue_id)
+    
+    # Verify the issue belongs to this student
+    if issue.student_id != student.id:
+        flash('Invalid operation!', 'error')
+        return redirect(url_for('students.student_profile', admission_number=admission_number))
+    
+    if not issue.returned:
+        issue.returned = True
+        issue.return_date = datetime.utcnow()
+        issue.calculate_fine()
+        
+        book = Book.query.get(issue.book_id)
+        book.available = True
+        
+        try:
+            db.session.commit()
+            if issue.fine > 0:
+                flash(f'Book "{book.title}" (Code: {book.book_code}) returned successfully! Fine: ₹{issue.fine:.2f}', 'warning')
+            else:
+                flash(f'Book "{book.title}" (Code: {book.book_code}) returned successfully!', 'success')
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error returning book: {str(e)}', 'error')
+    else:
+        flash('Book already returned!', 'error')
+    
+    return redirect(url_for('students.student_profile', admission_number=admission_number))
