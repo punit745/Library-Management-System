@@ -70,7 +70,7 @@ Library-Management-System/
 ### Step 1: Clone the Repository
 ```bash
 git clone https://github.com/punit745/Library-Management-System.git
-cd Library-Management-System
+
 ```
 
 ### Step 2: Create Virtual Environment
